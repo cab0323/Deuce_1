@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/welcomeActivity_container"
+    android:background="@color/courtColor"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    tools:context=".welcomeActivity">
+
+
+    <TextView
+        android:id="@+id/welcomeActivity_welcomeText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="Welcome to Deuce"
+        android:textColor="@color/white"
+        android:textSize="30dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <!-- button that when clicked will start the other activity the game.
+        set to not enabled as default. Will only enable when a selection has been
+        made -->
+    <Button
+        android:id="@+id/welcomeActivity_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:text="Start Game"
+        android:enabled="false"
+
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/welcomeActivity_welcomeText"
+        />
+
+    <!-- this is where my guideline is -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/welcomeActivity_horGuide_center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+
+        app:layout_constraintGuide_percent="0.5"
+        />
+
+    <!--These next buttons are the buttons user selects what side of screen they want to start on -->
+    <Button
+        android:id="@+id/welcomeActivity_rightButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="60dp"
+        android:text="RIGHT"
+        android:background="@drawable/bg_selector"
+
+        app:layout_constraintTop_toTopOf="@id/welcomeActivity_horGuide_center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
+    <Button
+        android:id="@+id/welcomeActivity_leftButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="60dp"
+        android:text="LEFT"
+        android:background="@drawable/bg_selector"
+
+        app:layout_constraintTop_toTopOf="@id/welcomeActivity_horGuide_center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        />
+
+    <!-- this text will tell user they need to click one of these buttons above before start game button will work -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Click a Bottom below then after that click start"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        android:layout_marginTop="15dp"
+
+        app:layout_constraintTop_toBottomOf="@id/welcomeActivity_horGuide_center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
+    <!-- this text will be at bottom of screen letting user know which button they clicked -->
+    <TextView
+        android:id="@+id/welcomeActivity_bottomText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You have selected"
+        android:textSize="20dp"
+        android:layout_marginBottom="30dp"
+        android:textColor="@drawable/disappear_text"
+        android:enabled="false"
+
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

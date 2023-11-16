@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Deuce_1</string>
+    <string name="right_side_chosen">You chose the RIGHT side</string>
+    <string name="left_side_chosen">You chose the LEFT side</string>
+</resources>
