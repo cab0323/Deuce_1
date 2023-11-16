@@ -1,6 +1,5 @@
 package com.christian.deuce_1;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -11,7 +10,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.ImageView;
 import java.util.Random;
 
@@ -296,10 +294,6 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         @Override
         public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
 
-/*            mRunning = true;
-
-            mThread = new Thread(d);
-            mThread.start();*/
             surfaceCreated = true;
 
         }
@@ -312,13 +306,6 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         @Override
         public void surfaceDestroyed(@NonNull SurfaceHolder surfaceHolder) {
 
-/*            mRunning = false;
-
-            try {
-                mThread.join();
-            } catch (InterruptedException e){
-                Log.d("SurfaceDestroyed", "surfaceDestroyed: could not join thread");
-            }*/
             surfaceCreated = false;
         }
     }
@@ -424,140 +411,4 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         }
     }
 
-    /* This is where the thread goes
-     */
-/*
-    @Override
-    public void run() {
-
-        while(mRunning){
-            //keep track of how long this frame will take
-            long frameStartTime = System.currentTimeMillis();
-
-            //if the game is not paused
-            if(!mPaused){
-                //update the postion of each object
-                update();
-
-                //detect collisions at new postions
-                detectCollisions();
-            }
-
-            //draw the objects
-            draw();
-
-            long frameEndTime = System.currentTimeMillis() - frameStartTime;
-
-            if(frameEndTime > 0){
-                mFPS = MILLIS_IN_SECOND / frameEndTime;
-            }
-        }
-    }
-
-    *//*
-    My update method will just individually call each objects update method
-     *//*
-    public void update(){
-        mBall.update(mFPS);
-    }
-
-    *//*
-    Detect the collisions of the objects
-     *//*
-    public void detectCollisions(){
-        //the limits of the screen are [0, horizontalResolution];
-        if(mBall.getPosition().left < 0){
-            mBall.changeXdirection();
-        }
-        else if (mBall.getPosition().right > horizontalResolution){
-            mBall.changeXdirection();
-        }
-
-        if(mBall.getPosition().top < 0){
-            mBall.changeYdirection();
-        }
-        else if (mBall.getPosition().bottom > verticalResolution){
-            mBall.changeYdirection();
-        }
-    }
-
-    *//* This method will draw the our game
-     * takes in bool to know weather the player has touched yet and if so then
-     * needs to draw player touch*//*
-    public void draw(){
-        gameView.setImageBitmap(blankBitmap);
-
-        if(mHolder.getSurface().isValid()){
-            Log.d("DRAW", "draw: mHolder is VALID");
-        }
-        else {
-            System.exit(1);
-        }
-*//*
-        //wipe the screen
-        canvas.drawColor(Color.rgb(22,13,158));
-
-        //set the color of the paint
-        paint.setColor(Color.argb(255,255,255,255));
-
-        //draw the net
-        //find the half of the court
-        int halfCourtHorizontal = horizontalResolution / 2;
-        int halfCourtVertical = verticalResolution / 2;
-
-*//*
-*//*        //draw the net in the middle
-        //first the vertical lines
-        canvas.drawLine(halfCourtHorizontal - 20, 0, halfCourtHorizontal - 20 , horizontalResolution, paint);
-        canvas.drawLine(halfCourtHorizontal + 20, 0, halfCourtHorizontal + 20, verticalResolution, paint);
-
-        //draw horizontal lines
-        int netStart = 0;
-        for(;netStart < verticalResolution; netStart += 3){
-            canvas.drawLine(halfCourtHorizontal - 20, netStart, halfCourtHorizontal + 20, netStart, paint);
-        }*//**//*
-
-
-        //draw the ball
-        canvas.drawRect(mBall.getPosition(), paint);
-
-        //draw the bat
-        //canvas.drawRect(mRaquet.getBatLocation(), paint);
-*//*
-
-
-    }
-
-
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        //only do this once the user lifts the finger off from the screen
-        if((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN){
-            horizontalPixelTouched = (int)event.getX();
-            verticalPixelTouched = (int)event.getY();
-            //unpause game and start moving objects
-            mPaused = false;
-            //draw(true, horizontalPixelTouched, verticalPixelTouched);
-        }
-
-        return true;
-    }
-
-    public void resume(){
-        mRunning = true;
-
-        mThread = new Thread(this);
-        mThread.start();
-    }
-
-    public void pause(){
-        mRunning = false;
-
-        try {
-            mThread.join();
-        } catch (InterruptedException e){
-            Log.d("Thread Error", "pause: Thread could not join. ");
-        }
-    }*/
 }
