@@ -12,6 +12,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import java.util.Random;
 
 import androidx.annotation.NonNull;
@@ -35,6 +37,11 @@ public class DeuceEngine extends SurfaceView implements Runnable{
     private volatile boolean mRunning;
     private volatile boolean surfaceCreated = false;
     private boolean mPaused = true;
+    private int userLives;
+    private int botLives;
+    private int userScore;
+    private int botScore;
+
 
 
 
@@ -59,6 +66,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
     private final int RACKET_NOT_MOVING = 0;
     private final int RACKET_LEFT = -1;
     private final int RACKET_RIGHT = 1;
+    private int userSide;
 
     public DeuceEngine(Context context, int x, int y, int userSide){
         super(context);
@@ -74,16 +82,14 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         Log.i("bitHorizontal", "bitHorizontal: " + bitHorizontal);
         Log.i("bitVertical", "bitVertical: " + bitVertical);
 
-        //initialize the drawing variables
-        //tennisCourt = Bitmap.createBitmap(bitHorizontal, bitVertical, Bitmap.Config.ARGB_8888);
-        tennisCourt = BitmapFactory.decodeResource(getResources(), R.drawable.tenni_court);
-        //testCanvas = new Canvas(tennisCourt);
 
         mHolder = getHolder();
         paint = new Paint();
 
         //initialize objects
         mBall = new Ball(x, y);
+
+        this.userSide = userSide;
 
         //put the rackets on the correct side depending where the user wants theirs
         if(userSide == RACKET_LEFT) {
@@ -97,9 +103,23 @@ public class DeuceEngine extends SurfaceView implements Runnable{
             botRacket = new Raquet(x, y, RACKET_LEFT);
         }
 
-
+        startNewGame();
         mHolder.addCallback(new myCallback(this));
 
+    }
+
+    /*
+    This method will just set everything ready for the game. Will also be called when the game is ove and
+    a new one is to start.
+     */
+    public void startNewGame(){
+        mBall.reset();
+
+        //set the user and bots lives and scores
+        userLives = 3;
+        userScore = 0;
+        botLives = 3;
+        botScore = 0;
     }
 
     @Override
@@ -237,47 +257,21 @@ public class DeuceEngine extends SurfaceView implements Runnable{
             //consider making this a variable so i don't have to get it everytime the draw is called.
             canvas.drawColor(getResources().getColor(R.color.grass_green));
 
-            //get the middle of the screen
+            //get the middle of the screen for the net
             int halfCourtHorizontal = horizontalScreenSize / 2;
             int halfCourtVertical = verticalScreenSize / 2;
 
-            //do the math for the court lines
-            int courtMarginY = (int)(verticalScreenSize * .20) / 2; //this gives how far from top and bottom court should be
-            int courtMarginX = (int)(horizontalScreenSize * .20) / 2; //how far court should be from left and right
-
-            //set the variables for the lines
-            int courtLineHorizontalStart = courtMarginX;
-            int courtLineHorizontalEnd = horizontalScreenSize - courtMarginX;
-            int courtLineVerticalStart = courtMarginY;
-            int courtLineVerticalEnd = verticalScreenSize - courtMarginY;
+            //get the information for the HUD
+            int verticalCourtStart = (int)(verticalScreenSize * (.20));
+            drawHUD(verticalCourtStart);
 
             //set the color of the paint and width for the court lines
             paint.setColor(Color.argb(255, 255, 255, 255));
             paint.setStrokeWidth(10);
 
-            //the net line
-            canvas.drawLine(halfCourtHorizontal, 0, halfCourtHorizontal, verticalScreenSize, paint);
+            //draw the net line from end of hud to bottom of screen
+            canvas.drawLine(halfCourtHorizontal, verticalCourtStart, halfCourtHorizontal, verticalScreenSize, paint);
 
-
-
-/*
-            //draw the net
-            //find the half of the court
-            int halfCourtHorizontal = horizontalScreenSize / 2;
-            int halfCourtVertical = verticalScreenSize / 2;
-
-
-            //draw the net in the middle
-            //first the vertical lines
-            canvas.drawLine(halfCourtHorizontal - 20, 0, halfCourtHorizontal - 20, horizontalScreenSize, paint);
-            canvas.drawLine(halfCourtHorizontal + 20, 0, halfCourtHorizontal + 20, verticalScreenSize, paint);
-
-            //draw horizontal lines
-            int netStart = 0;
-            for (; netStart < verticalScreenSize; netStart += 3) {
-                canvas.drawLine(halfCourtHorizontal - 20, netStart, halfCourtHorizontal + 20, netStart, paint);
-            }
-*/
 
 
             //draw the ball
@@ -300,6 +294,37 @@ public class DeuceEngine extends SurfaceView implements Runnable{
             System.exit(1);
         }
 
+    }
+
+    public void drawHUD(int verticalCourtStart){
+        //draw the rectangle for the Background of the HUD
+        canvas.drawRect(0, 0, horizontalScreenSize, verticalCourtStart, paint);
+
+        //draw the rectangle for the Background of the HUD
+        canvas.drawRect(0, 0, horizontalScreenSize, verticalCourtStart, paint);
+        int fontSize = (int)(horizontalScreenSize * .03);
+        int hudLocation = (int)(horizontalScreenSize * .10);
+        paint.setTextSize(fontSize);
+        paint.setColor(getResources().getColor(R.color.black));
+
+        if(userSide == RACKET_LEFT) {
+            //users HUD is the left, draw it first
+            canvas.drawText("Score: " + userScore, hudLocation, verticalCourtStart / 2, paint);
+            canvas.drawText("Lives: " + userLives, hudLocation, (verticalCourtStart / 2) + fontSize, paint);
+
+            //draw the bot side HUD
+            canvas.drawText("Score: " + botScore, horizontalScreenSize - (hudLocation * 2), (verticalCourtStart / 2), paint);
+            canvas.drawText("Lives: " + botLives, horizontalScreenSize - (hudLocation * 2), (verticalCourtStart / 2) + fontSize, paint);
+        }
+        else {
+            //the bots side is on the left here
+            canvas.drawText("Score: " + botScore, hudLocation, verticalCourtStart / 2, paint);
+            canvas.drawText("Lives: " + botLives, hudLocation, (verticalCourtStart / 2) + fontSize, paint);
+
+            //the users HUD is on the right
+            canvas.drawText("Score: " + userScore, horizontalScreenSize - (hudLocation * 2), (verticalCourtStart / 2), paint);
+            canvas.drawText("Lives: " + userLives, horizontalScreenSize - (hudLocation * 2), (verticalCourtStart / 2) + fontSize, paint);
+        }
     }
 
     /*
