@@ -2,6 +2,7 @@ package com.christian.deuce_1;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,11 +15,17 @@ import android.widget.ImageView;
 import java.util.Random;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+
+/*
+Trying to draw the court better. Remember to uncomment out the methods in ontoughevent and on run so the program runs like
+it should once i am done. Also uncomment out the ball and bats in draw
+ */
 
 public class DeuceEngine extends SurfaceView implements Runnable{
 
-    private int horizontalResolution;
-    private int verticalResolution;
+    private int horizontalScreenSize;
+    private int verticalScreenSize;
     private int horizontalPixelTouched;
     private int verticalPixelTouched;
 
@@ -35,8 +42,9 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
     private ImageView gameView;
 
-    private Bitmap blankBitmap;
+    private Bitmap tennisCourt;
     private Canvas canvas;
+    private Canvas testCanvas; //this canvas will go with bitmap
     private Paint paint;
 
     //my object variables
@@ -56,13 +64,21 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         super(context);
 
         //set the size of the screen
-        horizontalResolution = x;
-        verticalResolution = y;
+        horizontalScreenSize = x;
+        verticalScreenSize = y;
 
+        //local variables just to set the bitmap
+        int bitHorizontal = (int)(horizontalScreenSize * 0.3);
+        int bitVertical = (int)(verticalScreenSize * .3);
+
+        Log.i("bitHorizontal", "bitHorizontal: " + bitHorizontal);
+        Log.i("bitVertical", "bitVertical: " + bitVertical);
 
         //initialize the drawing variables
-        blankBitmap = Bitmap.createBitmap(horizontalResolution, verticalResolution, Bitmap.Config.ARGB_8888);
-        //canvas = new Canvas(blankBitmap);
+        //tennisCourt = Bitmap.createBitmap(bitHorizontal, bitVertical, Bitmap.Config.ARGB_8888);
+        tennisCourt = BitmapFactory.decodeResource(getResources(), R.drawable.tenni_court);
+        //testCanvas = new Canvas(tennisCourt);
+
         mHolder = getHolder();
         paint = new Paint();
 
@@ -96,6 +112,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
                 //keep track of how long this frame will take
                 long frameStartTime = System.currentTimeMillis();
 
+/*
                 //if the game is not paused
                 if (!mPaused) {
                     //first move the AI bot
@@ -107,6 +124,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
                     //detect collisions at new positions
                     detectCollisions();
                 }
+*/
 
                 //draw the objects
                 draw();
@@ -146,7 +164,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         }
 
         //bottom
-        if (mBall.getPosition().bottom > verticalResolution){
+        if (mBall.getPosition().bottom > verticalScreenSize){
             //ball hit bottom bounce back into play
             mBall.changeYdirection();
         }
@@ -159,7 +177,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
             mBall.reset();
         }
 
-        if(mBall.getPosition().right > horizontalResolution){
+        if(mBall.getPosition().right > horizontalScreenSize){
             mBall.reset();
         }
     }
@@ -167,8 +185,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-
-        switch (event.getAction() & MotionEvent.ACTION_MASK){
+/*        switch (event.getAction() & MotionEvent.ACTION_MASK){
             //if the player touched the screen
             case (MotionEvent.ACTION_DOWN):
 
@@ -182,7 +199,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
                 Log.i("ACTION_DOWN", "onTouchEvent: the screen was touched");
 
                 //if player touched bottom half of screen move racket towards the top
-                if(verticalPixelTouched > (verticalResolution / 2)){
+                if(verticalPixelTouched > (verticalScreenSize / 2)){
                     mRaquet.setRacketMovingDirection(RACKET_MOVING_DOWN);
                     Log.i("MOVE DOWN", "onTouchEvent: the bat is moving down");
                 }
@@ -203,13 +220,13 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
                 break;
 
-        }
+        }*/
 
         return true;
     }
 
     public void draw(){
-        //gameView.setImageBitmap(blankBitmap);
+
 
         if (mHolder.getSurface().isValid()) {
             //Log.d("DRAW", "draw: mHolder is VALID");
@@ -217,30 +234,54 @@ public class DeuceEngine extends SurfaceView implements Runnable{
             //lock the canvas so we can be the only ones using it while we draw
             canvas = mHolder.lockCanvas();
             //wipe the screen
-            canvas.drawColor(Color.rgb(22, 13, 158));
+            //consider making this a variable so i don't have to get it everytime the draw is called.
+            canvas.drawColor(getResources().getColor(R.color.grass_green));
 
-            //set the color of the paint
+            //get the middle of the screen
+            int halfCourtHorizontal = horizontalScreenSize / 2;
+            int halfCourtVertical = verticalScreenSize / 2;
+
+            //do the math for the court lines
+            int courtMarginY = (int)(verticalScreenSize * .20) / 2; //this gives how far from top and bottom court should be
+            int courtMarginX = (int)(horizontalScreenSize * .20) / 2; //how far court should be from left and right
+
+            //set the variables for the lines
+            int courtLineHorizontalStart = courtMarginX;
+            int courtLineHorizontalEnd = horizontalScreenSize - courtMarginX;
+            int courtLineVerticalStart = courtMarginY;
+            int courtLineVerticalEnd = verticalScreenSize - courtMarginY;
+
+            //set the color of the paint and width for the court lines
             paint.setColor(Color.argb(255, 255, 255, 255));
+            paint.setStrokeWidth(10);
 
+            //the net line
+            canvas.drawLine(halfCourtHorizontal, 0, halfCourtHorizontal, verticalScreenSize, paint);
+
+
+
+/*
             //draw the net
             //find the half of the court
-            int halfCourtHorizontal = horizontalResolution / 2;
-            int halfCourtVertical = verticalResolution / 2;
+            int halfCourtHorizontal = horizontalScreenSize / 2;
+            int halfCourtVertical = verticalScreenSize / 2;
 
 
             //draw the net in the middle
             //first the vertical lines
-            canvas.drawLine(halfCourtHorizontal - 20, 0, halfCourtHorizontal - 20, horizontalResolution, paint);
-            canvas.drawLine(halfCourtHorizontal + 20, 0, halfCourtHorizontal + 20, verticalResolution, paint);
+            canvas.drawLine(halfCourtHorizontal - 20, 0, halfCourtHorizontal - 20, horizontalScreenSize, paint);
+            canvas.drawLine(halfCourtHorizontal + 20, 0, halfCourtHorizontal + 20, verticalScreenSize, paint);
 
             //draw horizontal lines
             int netStart = 0;
-            for (; netStart < verticalResolution; netStart += 3) {
+            for (; netStart < verticalScreenSize; netStart += 3) {
                 canvas.drawLine(halfCourtHorizontal - 20, netStart, halfCourtHorizontal + 20, netStart, paint);
             }
+*/
 
 
             //draw the ball
+/*
             canvas.drawRect(mBall.getPosition(), paint);
 
             //draw the user controlled racket
@@ -248,6 +289,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
             //draw the AI racket
             canvas.drawRect(botRacket.getRacketLocation(), paint);
+*/
 
             //unlock the canvas memory and post what we drew
             mHolder.unlockCanvasAndPost(canvas);

@@ -3,4 +3,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="courtColor">#170d9e</color>
+    <color name="grass_green">#14b524</color>
 </resources>
