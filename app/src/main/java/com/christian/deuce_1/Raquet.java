@@ -16,6 +16,7 @@ public class Raquet {
     private float topLocation;
 
     private float racketSpeed;
+    private int upperLimit;
 
     private final int RACKET_MOVING_UP = 1;
     private final int RACKET_MOVING_DOWN = -1;
@@ -42,6 +43,8 @@ public class Raquet {
 
         topLocation= screenSizeY / 2;
 
+        //set the upper limit for the racket, can't go above this point. Will be the bottom of the HUD screen. HUD will always be 20% of screen vertical size
+        upperLimit = (int)(screenSizeY * .20);
 
         racketLocation = new RectF(leftLocation, topLocation, leftLocation + racketSizeHorizontal,
                 topLocation + racketSizeVertical);
@@ -67,8 +70,8 @@ public class Raquet {
         }
 
         // Stop the bat going off the screen
-        if(topLocation < 0){
-            topLocation = 0;
+        if(topLocation < upperLimit){
+            topLocation = upperLimit;
         }
         else if(topLocation + racketSizeVertical > screenSizeY){
             topLocation = screenSizeY - racketSizeVertical;

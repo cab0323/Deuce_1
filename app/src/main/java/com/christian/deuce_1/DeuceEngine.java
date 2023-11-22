@@ -67,6 +67,8 @@ public class DeuceEngine extends SurfaceView implements Runnable{
     private final int RACKET_LEFT = -1;
     private final int RACKET_RIGHT = 1;
     private int userSide;
+    private int hudSize;
+
 
     public DeuceEngine(Context context, int x, int y, int userSide){
         super(context);
@@ -74,6 +76,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         //set the size of the screen
         horizontalScreenSize = x;
         verticalScreenSize = y;
+
 
         //local variables just to set the bitmap
         int bitHorizontal = (int)(horizontalScreenSize * 0.3);
@@ -90,6 +93,8 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         mBall = new Ball(x, y);
 
         this.userSide = userSide;
+
+        hudSize = (int)(verticalScreenSize * .20);
 
         //put the rackets on the correct side depending where the user wants theirs
         if(userSide == RACKET_LEFT) {
@@ -132,7 +137,6 @@ public class DeuceEngine extends SurfaceView implements Runnable{
                 //keep track of how long this frame will take
                 long frameStartTime = System.currentTimeMillis();
 
-/*
                 //if the game is not paused
                 if (!mPaused) {
                     //first move the AI bot
@@ -144,7 +148,6 @@ public class DeuceEngine extends SurfaceView implements Runnable{
                     //detect collisions at new positions
                     detectCollisions();
                 }
-*/
 
                 //draw the objects
                 draw();
@@ -177,8 +180,8 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         }
 
         //check if the ball has hit the sides or outside
-        //top
-        if(mBall.getPosition().top < 1){
+        //top, the top is the bottom of the HUD
+        if(mBall.getPosition().top < hudSize ){
             //ball hit the top bounce back down
             mBall.changeYdirection();
         }
@@ -191,21 +194,47 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
         /*
         both the left and right side will reset the ball because they are essentially "goals". Since there
-        is two rackets each guarding they're side if the ball goes through then reset the ball.
+        is two rackets each guarding they're side if the ball goes through then reset the ball. Here is where
+        the scores will also be updated.
          */
         if(mBall.getPosition().left < 1){
+            //ball went out the left side
+
+            //reset the ball
             mBall.reset();
+
+            //update the score
+            if(userSide == RACKET_LEFT){
+                //the user controls racket on this side therefore they got scored on. Bot score goes up by one goal
+                botScore++;
+            }
+            else {
+                //the bot controls this side and got scored on. Give user a goal
+                userScore++;
+            }
         }
 
         if(mBall.getPosition().right > horizontalScreenSize){
+            //ball went out the right side
+
+            //reset the ball
             mBall.reset();
+
+            if(userSide == RACKET_RIGHT){
+                //the user controls this side and got scored on. Give bot a goal
+                botScore++;
+            }
+            else {
+                //the bot controls this side, therefore give user a goal
+                userScore++;
+            }
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-/*        switch (event.getAction() & MotionEvent.ACTION_MASK){
+        switch (event.getAction() & MotionEvent.ACTION_MASK){
             //if the player touched the screen
             case (MotionEvent.ACTION_DOWN):
 
@@ -240,7 +269,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
                 break;
 
-        }*/
+        }
 
         return true;
     }
@@ -261,21 +290,18 @@ public class DeuceEngine extends SurfaceView implements Runnable{
             int halfCourtHorizontal = horizontalScreenSize / 2;
             int halfCourtVertical = verticalScreenSize / 2;
 
-            //get the information for the HUD
-            int verticalCourtStart = (int)(verticalScreenSize * (.20));
-            drawHUD(verticalCourtStart);
+            //draw HUD
+            drawHUD();
 
             //set the color of the paint and width for the court lines
             paint.setColor(Color.argb(255, 255, 255, 255));
             paint.setStrokeWidth(10);
 
             //draw the net line from end of hud to bottom of screen
-            canvas.drawLine(halfCourtHorizontal, verticalCourtStart, halfCourtHorizontal, verticalScreenSize, paint);
-
+            canvas.drawLine(halfCourtHorizontal, hudSize, halfCourtHorizontal, verticalScreenSize, paint);
 
 
             //draw the ball
-/*
             canvas.drawRect(mBall.getPosition(), paint);
 
             //draw the user controlled racket
@@ -283,7 +309,6 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
             //draw the AI racket
             canvas.drawRect(botRacket.getRacketLocation(), paint);
-*/
 
             //unlock the canvas memory and post what we drew
             mHolder.unlockCanvasAndPost(canvas);
@@ -296,12 +321,12 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
     }
 
-    public void drawHUD(int verticalCourtStart){
+    public void drawHUD(){
         //draw the rectangle for the Background of the HUD
-        canvas.drawRect(0, 0, horizontalScreenSize, verticalCourtStart, paint);
+        canvas.drawRect(0, 0, horizontalScreenSize, hudSize, paint);
 
         //draw the rectangle for the Background of the HUD
-        canvas.drawRect(0, 0, horizontalScreenSize, verticalCourtStart, paint);
+        canvas.drawRect(0, 0, horizontalScreenSize, hudSize, paint);
         int fontSize = (int)(horizontalScreenSize * .03);
         int hudLocation = (int)(horizontalScreenSize * .10);
         paint.setTextSize(fontSize);
@@ -309,21 +334,21 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
         if(userSide == RACKET_LEFT) {
             //users HUD is the left, draw it first
-            canvas.drawText("Score: " + userScore, hudLocation, verticalCourtStart / 2, paint);
-            canvas.drawText("Lives: " + userLives, hudLocation, (verticalCourtStart / 2) + fontSize, paint);
+            canvas.drawText("Score: " + userScore, hudLocation, hudSize / 2, paint);
+            canvas.drawText("Lives: " + userLives, hudLocation, (hudSize / 2) + fontSize, paint);
 
             //draw the bot side HUD
-            canvas.drawText("Score: " + botScore, horizontalScreenSize - (hudLocation * 2), (verticalCourtStart / 2), paint);
-            canvas.drawText("Lives: " + botLives, horizontalScreenSize - (hudLocation * 2), (verticalCourtStart / 2) + fontSize, paint);
+            canvas.drawText("Score: " + botScore, horizontalScreenSize - (hudLocation * 2), (hudSize / 2), paint);
+            canvas.drawText("Lives: " + botLives, horizontalScreenSize - (hudLocation * 2), (hudSize / 2) + fontSize, paint);
         }
         else {
             //the bots side is on the left here
-            canvas.drawText("Score: " + botScore, hudLocation, verticalCourtStart / 2, paint);
-            canvas.drawText("Lives: " + botLives, hudLocation, (verticalCourtStart / 2) + fontSize, paint);
+            canvas.drawText("Score: " + botScore, hudLocation, hudSize / 2, paint);
+            canvas.drawText("Lives: " + botLives, hudLocation, (hudSize / 2) + fontSize, paint);
 
             //the users HUD is on the right
-            canvas.drawText("Score: " + userScore, horizontalScreenSize - (hudLocation * 2), (verticalCourtStart / 2), paint);
-            canvas.drawText("Lives: " + userLives, horizontalScreenSize - (hudLocation * 2), (verticalCourtStart / 2) + fontSize, paint);
+            canvas.drawText("Score: " + userScore, horizontalScreenSize - (hudLocation * 2), (hudSize / 2), paint);
+            canvas.drawText("Lives: " + userLives, horizontalScreenSize - (hudLocation * 2), (hudSize / 2) + fontSize, paint);
         }
     }
 

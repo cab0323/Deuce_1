@@ -22,7 +22,7 @@ public class Ball {
 
         //testing speeds for the velocities
         mXvelocity = (screenSizeX / 4);
-        mYvelocity = (screenSizeY / 3);
+        mYvelocity = (screenSizeY / 4);
 
         screenX = screenSizeX;
         screenY = screenSizeY;
