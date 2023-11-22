@@ -350,6 +350,15 @@ public class DeuceEngine extends SurfaceView implements Runnable{
             canvas.drawText("Score: " + userScore, horizontalScreenSize - (hudLocation * 2), (hudSize / 2), paint);
             canvas.drawText("Lives: " + userLives, horizontalScreenSize - (hudLocation * 2), (hudSize / 2) + fontSize, paint);
         }
+
+        //test draw the buttons for the pause, and whatever else i may add as buttons
+        //i want the button to be 3% of the screen width and 2% of height
+        int buttonWidth  = (int)(horizontalScreenSize * .02);
+        int buttonHeight = (int)(verticalScreenSize * .03);
+        int middleOfScreen = (int)(horizontalScreenSize / 2);
+
+        //testing draw the button in the HUD for pausing
+        canvas.drawRect((middleOfScreen - (buttonWidth / 2)), (hudSize / 2), (middleOfScreen + (buttonWidth / 2)), ((hudSize / 2) + buttonHeight), paint);
     }
 
     /*
