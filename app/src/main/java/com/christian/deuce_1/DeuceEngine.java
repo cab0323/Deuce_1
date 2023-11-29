@@ -68,6 +68,10 @@ public class DeuceEngine extends SurfaceView implements Runnable{
     private final int RACKET_RIGHT = 1;
     private int userSide;
     private int hudSize;
+    private int buttonWidth;
+    private int buttonHeight;
+    private int middleOfScreen;
+    private RectF pausePlayButton;
 
 
     public DeuceEngine(Context context, int x, int y, int userSide){
@@ -94,7 +98,17 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
         this.userSide = userSide;
 
+        //variables for the HUD
         hudSize = (int)(verticalScreenSize * .20);
+        //i want the button to be 3% of the screen width and 2% of height
+        buttonWidth  = (int)(horizontalScreenSize * .25);
+        buttonHeight = (int)(hudSize * .5);
+        middleOfScreen = horizontalScreenSize / 2;
+        pausePlayButton =  new RectF(0,0,0,0); //set it to nothing so i can use the method(button.left, button.right, etc) later
+        pausePlayButton.left = middleOfScreen - (buttonWidth / 2);
+        pausePlayButton.right = pausePlayButton.left + buttonWidth;
+        pausePlayButton.top = (hudSize / 2) - (buttonHeight / 2); //place the exact middle of the button in the middle of HUD height, half of the button above/below middle
+        pausePlayButton.bottom = pausePlayButton.top + buttonHeight;
 
         //put the rackets on the correct side depending where the user wants theirs
         if(userSide == RACKET_LEFT) {
@@ -243,9 +257,25 @@ public class DeuceEngine extends SurfaceView implements Runnable{
                 verticalPixelTouched = (int)event.getY();
 
                 //unpause game and start moving objects
-                mPaused = false;
+                //mPaused = false;
 
-                Log.i("ACTION_DOWN", "onTouchEvent: the screen was touched");
+                //check if user clicks pause button, check if it is between the button coordinate
+                if(pausePlayButton.left < horizontalPixelTouched && horizontalPixelTouched < pausePlayButton.right){
+                    //user click is between button horizontal coordinates, now check if it is between vertical coordinates
+                    if(pausePlayButton.top < verticalPixelTouched && verticalPixelTouched < pausePlayButton.bottom){
+                        //user clicked button
+                        /*
+                        This will set the boolean to the opposite of what it currently is. So if the game is paused and the user
+                        clicks the button then game will start. If game is playing and user clicks the button then the game
+                        will pause.
+                        * */
+                        mPaused = !mPaused;
+                    }
+                }
+                //if the game is paused and user clicks on any part of the screen the game will start
+                else {
+                    mPaused = false;
+                }
 
                 //if player touched bottom half of screen move racket towards the top
                 if(verticalPixelTouched > (verticalScreenSize / 2)){
@@ -275,7 +305,6 @@ public class DeuceEngine extends SurfaceView implements Runnable{
     }
 
     public void draw(){
-
 
         if (mHolder.getSurface().isValid()) {
             //Log.d("DRAW", "draw: mHolder is VALID");
@@ -328,37 +357,44 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         //draw the rectangle for the Background of the HUD
         canvas.drawRect(0, 0, horizontalScreenSize, hudSize, paint);
         int fontSize = (int)(horizontalScreenSize * .03);
-        int hudLocation = (int)(horizontalScreenSize * .10);
+        int scoreLocation = (int)(horizontalScreenSize * .10);
         paint.setTextSize(fontSize);
         paint.setColor(getResources().getColor(R.color.black));
 
         if(userSide == RACKET_LEFT) {
             //users HUD is the left, draw it first
-            canvas.drawText("Score: " + userScore, hudLocation, hudSize / 2, paint);
-            canvas.drawText("Lives: " + userLives, hudLocation, (hudSize / 2) + fontSize, paint);
+            canvas.drawText("Score: " + userScore, scoreLocation, hudSize / 2, paint);
+            canvas.drawText("Lives: " + userLives, scoreLocation, (hudSize / 2) + fontSize, paint);
 
             //draw the bot side HUD
-            canvas.drawText("Score: " + botScore, horizontalScreenSize - (hudLocation * 2), (hudSize / 2), paint);
-            canvas.drawText("Lives: " + botLives, horizontalScreenSize - (hudLocation * 2), (hudSize / 2) + fontSize, paint);
+            canvas.drawText("Score: " + botScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
+            canvas.drawText("Lives: " + botLives, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2) + fontSize, paint);
         }
         else {
             //the bots side is on the left here
-            canvas.drawText("Score: " + botScore, hudLocation, hudSize / 2, paint);
-            canvas.drawText("Lives: " + botLives, hudLocation, (hudSize / 2) + fontSize, paint);
+            canvas.drawText("Score: " + botScore, scoreLocation, hudSize / 2, paint);
+            canvas.drawText("Lives: " + botLives, scoreLocation, (hudSize / 2) + fontSize, paint);
 
             //the users HUD is on the right
-            canvas.drawText("Score: " + userScore, horizontalScreenSize - (hudLocation * 2), (hudSize / 2), paint);
-            canvas.drawText("Lives: " + userLives, horizontalScreenSize - (hudLocation * 2), (hudSize / 2) + fontSize, paint);
+            canvas.drawText("Score: " + userScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
+            canvas.drawText("Lives: " + userLives, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2) + fontSize, paint);
         }
 
         //test draw the buttons for the pause, and whatever else i may add as buttons
-        //i want the button to be 3% of the screen width and 2% of height
-        int buttonWidth  = (int)(horizontalScreenSize * .02);
-        int buttonHeight = (int)(verticalScreenSize * .03);
-        int middleOfScreen = (int)(horizontalScreenSize / 2);
 
         //testing draw the button in the HUD for pausing
-        canvas.drawRect((middleOfScreen - (buttonWidth / 2)), (hudSize / 2), (middleOfScreen + (buttonWidth / 2)), ((hudSize / 2) + buttonHeight), paint);
+        canvas.drawRect(pausePlayButton, paint);
+
+        //draw the text on the button
+        if(!mPaused){
+            paint.setColor(Color.rgb(252, 186, 3));
+            canvas.drawText("PAUSE", middleOfScreen - (pausePlayButton.width() / 8), (hudSize / 2) + (pausePlayButton.height() / 4), paint);
+        }
+        else {
+            paint.setColor(Color.rgb(252, 186, 3));
+            canvas.drawText("PLAY", middleOfScreen - (pausePlayButton.width() / 8), (hudSize / 2) + (pausePlayButton.height() / 4), paint);
+        }
+
     }
 
     /*
