@@ -72,6 +72,7 @@ public class DeuceEngine extends SurfaceView implements Runnable{
     private int buttonHeight;
     private int middleOfScreen;
     private RectF pausePlayButton;
+    private int winningScore;
 
 
     public DeuceEngine(Context context, int x, int y, int userSide){
@@ -97,6 +98,9 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         mBall = new Ball(x, y);
 
         this.userSide = userSide;
+
+        //set the winning score, whoever gets here first wins
+        winningScore = 3;
 
         //variables for the HUD
         hudSize = (int)(verticalScreenSize * .20);
@@ -213,7 +217,6 @@ public class DeuceEngine extends SurfaceView implements Runnable{
          */
         if(mBall.getPosition().left < 1){
             //ball went out the left side
-
             //reset the ball
             mBall.reset();
 
@@ -243,6 +246,15 @@ public class DeuceEngine extends SurfaceView implements Runnable{
                 userScore++;
             }
         }
+
+        //check if either has got to the winning score
+        if(botScore == winningScore){
+            Log.i("botScore", "detectCollisions: bot won");
+        }
+        if(userScore == winningScore){
+            Log.i("userScore", "detectCollisions: user won");
+        }
+
     }
 
     @Override
@@ -363,20 +375,20 @@ public class DeuceEngine extends SurfaceView implements Runnable{
 
         if(userSide == RACKET_LEFT) {
             //users HUD is the left, draw it first
-            canvas.drawText("Score: " + userScore, scoreLocation, hudSize / 2, paint);
-            canvas.drawText("Lives: " + userLives, scoreLocation, (hudSize / 2) + fontSize, paint);
+            canvas.drawText("YOU" + userLives, scoreLocation, hudSize / 2, paint);
+            canvas.drawText("Score: " + userScore, scoreLocation, (hudSize / 2) + fontSize, paint);
 
             //draw the bot side HUD
-            canvas.drawText("Score: " + botScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
-            canvas.drawText("Lives: " + botLives, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2) + fontSize, paint);
+            canvas.drawText("BOT" + botScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
+            canvas.drawText("Score: " + botLives, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2) + fontSize, paint);
         }
         else {
             //the bots side is on the left here
-            canvas.drawText("Score: " + botScore, scoreLocation, hudSize / 2, paint);
+            canvas.drawText("BOT" + botScore, scoreLocation, hudSize / 2, paint);
             canvas.drawText("Lives: " + botLives, scoreLocation, (hudSize / 2) + fontSize, paint);
 
             //the users HUD is on the right
-            canvas.drawText("Score: " + userScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
+            canvas.drawText("YOU" + userScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
             canvas.drawText("Lives: " + userLives, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2) + fontSize, paint);
         }
 
