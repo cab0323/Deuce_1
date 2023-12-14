@@ -7,12 +7,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.os.Handler;
 
 import java.util.Random;
 
@@ -73,6 +75,11 @@ public class DeuceEngine extends SurfaceView implements Runnable{
     private int middleOfScreen;
     private RectF pausePlayButton;
     private int winningScore;
+
+    //these variables will tell us which HUD to draw, the regular one with the scores or the one announcing the winner
+    private int whichHUD;
+    private final int WINNER_HUD_BOT = 1;
+    private final int WINNER_HUD_PLAYER = 2;
 
 
     public DeuceEngine(Context context, int x, int y, int userSide){
@@ -143,6 +150,9 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         userScore = 0;
         botLives = 3;
         botScore = 0;
+
+        //set the HUD variables
+        whichHUD = 0;
     }
 
     @Override
@@ -250,9 +260,15 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         //check if either has got to the winning score
         if(botScore == winningScore){
             Log.i("botScore", "detectCollisions: bot won");
+
+            //tell program to announce the bot winner on the HUD
+            whichHUD = WINNER_HUD_BOT;
         }
         if(userScore == winningScore){
             Log.i("userScore", "detectCollisions: user won");
+
+            //announce the player won
+            whichHUD = WINNER_HUD_PLAYER;
         }
 
     }
@@ -373,23 +389,63 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         paint.setTextSize(fontSize);
         paint.setColor(getResources().getColor(R.color.black));
 
+        //this will be used to set the delay when calling the new game
+        final Handler handler = new Handler(Looper.getMainLooper());
+
+        //first check if the winner should be shown
+        if(whichHUD == 1){
+            //the bot won, show it
+            canvas.drawText("WINNER: Bot", middleOfScreen, hudSize / 2, paint);
+
+            //pause the game and then exit the method so the program does not try to run the rest of the code in this method
+            mPaused = true;
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startNewGame();
+                }
+            }, 3000);
+
+            return;
+
+        } else if (whichHUD == 2){
+            //the player won, show it
+            canvas.drawText("WINNER: YOU", middleOfScreen, hudSize / 2, paint);
+
+            //pause and then exit the method
+            mPaused = true;
+
+            //testing delaying the method call so the user can see who won before new game is reset
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startNewGame();
+                }
+            }, 3000);
+
+            return;
+        }
+        //else move on to drawing the regular HUD which shows the scores
+
         if(userSide == RACKET_LEFT) {
             //users HUD is the left, draw it first
-            canvas.drawText("YOU" + userLives, scoreLocation, hudSize / 2, paint);
+            canvas.drawText("YOU", scoreLocation, hudSize / 2, paint);
             canvas.drawText("Score: " + userScore, scoreLocation, (hudSize / 2) + fontSize, paint);
 
             //draw the bot side HUD
-            canvas.drawText("BOT" + botScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
-            canvas.drawText("Score: " + botLives, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2) + fontSize, paint);
+            canvas.drawText("BOT", horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
+            canvas.drawText("Score: " + botScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2) + fontSize, paint);
         }
         else {
             //the bots side is on the left here
-            canvas.drawText("BOT" + botScore, scoreLocation, hudSize / 2, paint);
-            canvas.drawText("Lives: " + botLives, scoreLocation, (hudSize / 2) + fontSize, paint);
+            canvas.drawText("BOT", scoreLocation, hudSize / 2, paint);
+            canvas.drawText("Score: " + botScore, scoreLocation, (hudSize / 2) + fontSize, paint);
 
             //the users HUD is on the right
-            canvas.drawText("YOU" + userScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
-            canvas.drawText("Lives: " + userLives, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2) + fontSize, paint);
+            canvas.drawText("YOU", horizontalScreenSize - (scoreLocation * 2), (hudSize / 2), paint);
+            canvas.drawText("Score: " + userScore, horizontalScreenSize - (scoreLocation * 2), (hudSize / 2) + fontSize, paint);
         }
 
         //test draw the buttons for the pause, and whatever else i may add as buttons
@@ -494,19 +550,6 @@ public class DeuceEngine extends SurfaceView implements Runnable{
         //float racketCenter = botRacket.getRacketLocation().top + (botRacket.getRacketLocation().height() / 2);
         float ballCenter = mBall.getPosition().top + (mBall.getPosition().height() / 2);
 
-/*        //now move the racket accordingly
-        if(racketCenter < ballCenter){
-            //the racket is above the ball so move down
-            botRacket.setRacketMovingDirection(RACKET_MOVING_DOWN);
-        }
-        else if (racketCenter > ballCenter){
-            //the racket is below the ball so move up
-            botRacket.setRacketMovingDirection(RACKET_MOVING_UP);
-        }
-        else {
-            //the racket is equal to the ball so stop moving
-            botRacket.setRacketMovingDirection(RACKET_NOT_MOVING);
-        }*/
 
         //testing if it might be smoother to line up ball center with whole racket not just the racket center
         if(botRacket.getRacketLocation().top < ballCenter && botRacket.getRacketLocation().bottom > ballCenter){
